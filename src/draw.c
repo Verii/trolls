@@ -1,0 +1,95 @@
+#include <curses.h>   // for mvprintw, chtype, nodelay, stdscr, attrset, A_BOLD
+#include <locale.h>   // for setlocale, LC_ALL, NULL
+#include <stdbool.h>  // for false, true
+#include <stdint.h>   // for uint8_t, uint16_t
+#include <stdlib.h>   // for srand, size_t
+#include <time.h>     // for time
+#include "draw.h"
+#include "game.h"     // for entity, location, maze
+
+static const uint8_t X_OFF = 5;
+static const uint8_t Y_OFF = 5;
+
+static const short colors[] = {COLOR_WHITE,  COLOR_RED,  COLOR_GREEN,
+	COLOR_YELLOW, COLOR_BLUE, COLOR_MAGENTA,
+	COLOR_CYAN};
+
+void
+draw_init() {
+	srand((unsigned int) time(NULL));
+	setlocale(LC_ALL, "");
+
+	initscr();
+	cbreak();
+	noecho();
+	nonl();
+	intrflush(stdscr, FALSE);
+	keypad(stdscr, TRUE);
+	curs_set(0);
+
+	start_color();
+
+	for (uint8_t i = 0; i < sizeof(colors)/sizeof(*colors); i++)
+		init_pair(i+1, colors[i], COLOR_BLACK);
+
+	refresh();
+}
+
+void
+draw_cleanup() {
+	// make getch() non-blocking
+	nodelay(stdscr, true);
+	// drop all user input
+	while (getch() != ERR);
+	nodelay(stdscr, false);
+
+	refresh();
+	endwin();
+}
+
+int draw_getch(void) {
+	return getch();
+}
+
+void draw_game_over(void) {
+	attrset(COLOR_PAIR(COLOR_RED) | A_BOLD);
+	mvprintw(1, 0, "GAME OVER");
+}
+
+void
+draw_maze(const struct maze *maze) {
+	clear();
+	attrset(A_NORMAL);
+
+	for (uint8_t y = 0; y < maze->maze_height; y++) {
+		for (uint8_t x = 0; x < maze->maze_width; x++) {
+// Needs player
+//			struct location new_xy = { .x = x, .y = y };
+//			if (location_distance(player.loc, new_xy) < game->player_vision)
+				mvprintw(Y_OFF + y, X_OFF + x, "%c", MAZE_XY(maze, x, y));
+		}
+	}
+}
+
+void
+draw_player(const struct entity *player) {
+	attrset(COLOR_PAIR(COLOR_MAGENTA) | A_BOLD);
+	mvprintw(0, 0, "Player: (%.2d, %.2d)", player->loc.x, player->loc.y);
+	mvprintw(Y_OFF + player->loc.y, X_OFF + player->loc.x, "%c", 'P');
+}
+
+void
+draw_trolls(const struct entity *trolls, size_t num_trolls) {
+	attrset(COLOR_PAIR(COLOR_BLUE) | A_BOLD);
+
+	for (uint8_t i = 0; i < num_trolls; i++) {
+
+		const struct entity *troll = &(trolls[i]);
+
+// Needs player
+//		int32_t dist = location_distance(game->player.loc, game->trolls[i].loc);
+//		if (dist < game->player_vision)
+		mvprintw(Y_OFF + troll->loc.y, X_OFF + troll->loc.x, "%c", 'T');
+		mvprintw(i, 20, "Troll %d: (%.2d, %.2d)", i+1, troll->loc.x, troll->loc.y);
+	}
+}

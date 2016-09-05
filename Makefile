@@ -1,8 +1,8 @@
 CC = gcc
-CPPFLAGS = -std=c11
+CPPFLAGS = -std=c11 -Isrc/
 CFLAGS = -Wall -Wextra -Wpedantic -Os -DDEBUG
-CFLAGS += -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wformat=2
-LDFLAGS =
+CFLAGS += -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wformat=2
+LDFLAGS = -g
 LDLIBS = -lm -lncurses -levent_core
 
 ## Enable debugging flags
@@ -10,10 +10,10 @@ LDLIBS = -lm -lncurses -levent_core
 #CFLAGS += -Og -g
 
 ## Enable clang (I use both) ..
-CC = clang
-CFLAGS += -Weverything
+#CC = clang
+#CFLAGS += -Weverything
 
-trolls: src/main.c
+trolls: src/main.c src/troll.c src/location.c src/draw.c src/maze.c src/entity.c src/game.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $^
 
 #draw.o: draw.c draw.h
