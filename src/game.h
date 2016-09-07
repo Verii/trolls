@@ -5,7 +5,7 @@
 #include <stdint.h>   // for uint32_t, uint8_t
 
 enum direction {
-	NORTH,
+	NORTH = 0,
 	SOUTH,
 	EAST,
 	WEST,
