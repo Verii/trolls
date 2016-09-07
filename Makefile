@@ -12,6 +12,7 @@ LDLIBS = -lm -lncurses -levent_core
 ## Enable clang (I use both) ..
 #CC = clang
 #CFLAGS += -Weverything
+#CFLAGS += -O0 -g
 
 trolls: src/main.c src/troll.c src/location.c src/draw.c src/maze.c src/entity.c src/game.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $^
