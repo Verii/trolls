@@ -157,9 +157,46 @@ _calculate_path(const struct maze *maze, struct entity *troll, struct location d
 		return 0;
 	}
 
-	// FIXME
-	(void) maze;
-	(void) dest;
+	struct pathloc {
+		uint16_t x, y;
+		int32_t distance;
+		bool visited;
+		struct pathloc *prev;
+	};
+
+	struct queue {
+	};
+
+	struct stack {
+	};
+
+	// Mark each node with a distance of infinity(-1) and being unvisited
+	// Each node has an undefined parent node
+	// Check if the node is a traversible space - drop it if we can't move there
+	// Add all unvisited nodes to a queue
+	//
+	// While queue is not empty:
+	//  cur = find a node with the smallest distance to current vertex
+	//        (i.e. one of the adjacent nodes)
+	//  remove cur from queue
+	//
+	//  foreach adjacent node(a) to cur(c):
+	//   new_dist = distance of c + distance between c and a
+	//   if new_dist < distance of a
+	//    distance of a = new_dist
+	//    parent of a = c
+	//
+	//  if cur == target
+	//   terminate while loop
+	//
+	// Start with target node, and follow the prev(parent) links up to the
+	// current node. This is the reverse direction we need to travel to reach the
+	// target node.
+	//
+	// Push each node onto a stack as we're following their parent.
+	// Pop each node from the stack and calculate the direction we need to travel
+	//  to get there.
+	// Then append the direction to the steps array (up to 20 moves).
 
 	return 0;
 }
