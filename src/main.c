@@ -36,7 +36,7 @@ main(void) {
 		// wait for user input
 		int key = draw_getch();
 		update_player(game, key);
-		update_trolls(&game->maze, game->trolls, game->num_trolls);
+		trolls_update(&game->maze, game->trolls, game->num_trolls);
 
 		// Check game state (i.e. win or lose)
 		game_update(game);

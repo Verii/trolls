@@ -2,4 +2,4 @@
 
 #include "game.h"
 
-void update_trolls(struct maze *, struct entity *, size_t);
+void trolls_update(const struct maze *, struct entity *, size_t);
