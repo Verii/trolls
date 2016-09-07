@@ -98,12 +98,14 @@ maze_check_bound(const struct maze *maze, uint16_t value, enum direction dir)
 	switch (dir) {
 		case NORTH:
 		case SOUTH:
-			if (value >= maze->maze_height || value < 0)
+			if (value >= maze->maze_height
+					/* || value < 0 */)
 				return false;
 			break;
 		case EAST:
 		case WEST:
-			if (value >= maze->maze_width || value < 0)
+			if (value >= maze->maze_width
+					/* || value < 0 */)
 				return false;
 			break;
 	}
