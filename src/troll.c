@@ -3,7 +3,7 @@
 #include "troll.h"
 
 void
-update_trolls(struct maze *maze, struct entity *trolls, size_t num_trolls) {
+trolls_update(const struct maze *maze, struct entity *trolls, size_t num_trolls) {
 
 	for (uint8_t i = 0; i < num_trolls; i++) {
 
