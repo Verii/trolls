@@ -31,9 +31,9 @@ _longest_hallway(const struct maze *maze, struct entity *troll)
 		size_t len; // length to the nearest wall
 	} faces[4];
 
-	enum direction newface = troll->face;
+	enum direction newface;
 
-	// Find the length of each direction
+	// Find the length to the nearest wall in each direction
 	for (int dir = 0; dir < 4; dir++) {
 		newface = (troll->face +dir) % 4;
 
@@ -41,6 +41,7 @@ _longest_hallway(const struct maze *maze, struct entity *troll)
 		faces[dir].len = entity_look(maze, troll, newface);
 	}
 
+	// Find the direction with the furthest wall
 	uint8_t max_direction = 0;
 
 	for (int dir = 1; dir < 4; dir++) {
@@ -51,13 +52,34 @@ _longest_hallway(const struct maze *maze, struct entity *troll)
 	troll->face = faces[max_direction].dir;
 }
 
-// FIXME
-// TODO
 static void
 _shortest_hallway(const struct maze *maze, struct entity *troll)
 {
-	(void) maze;
-	(void) troll;
+	// Each of the 4 directions
+	struct {
+		enum direction dir;
+		size_t len; // length to the nearest wall
+	} faces[4];
+
+	enum direction newface;
+
+	// Find the length to the nearest wall in each direction
+	for (int dir = 0; dir < 4; dir++) {
+		newface = (troll->face +dir) % 4;
+
+		faces[dir].dir = newface;
+		faces[dir].len = entity_look(maze, troll, newface);
+	}
+
+	// Find the direction with the closest wall
+	uint8_t min_direction = 0;
+
+	for (int dir = 1; dir < 4; dir++) {
+		if (faces[dir].len < faces[min_direction].len)
+			min_direction = dir;
+	}
+
+	troll->face = faces[min_direction].dir;
 }
 
 // Turn in a random direction
