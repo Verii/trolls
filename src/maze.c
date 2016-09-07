@@ -42,6 +42,11 @@ maze_is_empty_space(const struct maze *maze, struct entity *entity, enum directi
 	return false;
 }
 
+bool
+maze_is_empty_space_loc(const struct maze *maze, struct location loc) {
+	return (maze_check_bound_loc(maze, loc) && MAZE_XY(maze, loc.x, loc.y) != '#');
+}
+
 /* Pick a random empty entity for the entity */
 int
 maze_random_spawn(const struct maze *maze, struct entity *entity) {
@@ -111,4 +116,10 @@ maze_check_bound(const struct maze *maze, uint16_t value, enum direction dir)
 	}
 
 	return true;
+}
+
+bool
+maze_check_bound_loc(const struct maze *maze, struct location loc)
+{
+	return (loc.y < maze->maze_height && loc.x < maze->maze_width);
 }
