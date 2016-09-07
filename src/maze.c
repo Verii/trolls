@@ -16,7 +16,7 @@ maze_load(struct maze *maze, const char *data, size_t datalen) {
 }
 
 bool
-maze_is_empty_space(struct maze *maze, struct entity *entity, enum direction dir) {
+maze_is_empty_space(const struct maze *maze, struct entity *entity, enum direction dir) {
 
 	uint16_t x, y;
 	x = entity->loc.x;
@@ -44,7 +44,7 @@ maze_is_empty_space(struct maze *maze, struct entity *entity, enum direction dir
 
 /* Pick a random empty entity for the entity */
 int
-maze_random_spawn(struct maze *maze, struct entity *entity) {
+maze_random_spawn(const struct maze *maze, struct entity *entity) {
 
 	// random (x, y) entity
 	uint16_t check_x = 0, check_y = 0;
@@ -93,7 +93,7 @@ maze_random_spawn(struct maze *maze, struct entity *entity) {
 
 // Make sure we're in bounds
 bool
-maze_check_bound(struct maze *maze, uint16_t value, enum direction dir)
+maze_check_bound(const struct maze *maze, uint16_t value, enum direction dir)
 {
 	switch (dir) {
 		case NORTH:

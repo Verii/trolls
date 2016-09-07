@@ -51,9 +51,9 @@ int entity_move(struct maze *, struct entity *, enum direction);
 int entity_look(struct maze *, struct entity *, enum direction);
 
 int maze_load(struct maze *, const char *, size_t);
-bool maze_is_empty_space(struct maze *, struct entity *, enum direction);
-int maze_random_spawn(struct maze *, struct entity *);
-bool maze_check_bound(struct maze *, uint16_t val, enum direction);
+bool maze_is_empty_space(const struct maze *, struct entity *, enum direction);
+int maze_random_spawn(const struct maze *, struct entity *);
+bool maze_check_bound(const struct maze *, uint16_t val, enum direction);
 
 struct game *game_new(void);
 void game_delete(struct game *);
