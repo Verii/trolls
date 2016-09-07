@@ -47,8 +47,8 @@ struct game {
 
 uint32_t location_distance(struct location, struct location);
 
-int entity_move(struct maze *, struct entity *, enum direction);
-int entity_look(struct maze *, struct entity *, enum direction);
+int entity_move(const struct maze *, struct entity *, enum direction);
+int entity_look(const struct maze *, struct entity *, enum direction);
 
 int maze_load(struct maze *, const char *, size_t);
 bool maze_is_empty_space(const struct maze *, struct entity *, enum direction);

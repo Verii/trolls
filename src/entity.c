@@ -3,7 +3,7 @@
 // Move the entity in the direction (dir)
 // We make sure the space is empty, and return 1 if we've moved
 // 0 otherwise
-int entity_move(struct maze *maze, struct entity *entity, enum direction dir)
+int entity_move(const struct maze *maze, struct entity *entity, enum direction dir)
 {
   switch (dir) {
 	case NORTH:
@@ -46,7 +46,7 @@ int entity_move(struct maze *maze, struct entity *entity, enum direction dir)
 // until a wall is hit.
 // Returns the number of blocks between the entity and the wall.
 // If the entity is standing next to a wall in (direction): return 0
-int entity_look(struct maze *maze, struct entity *entity, enum direction dir) {
+int entity_look(const struct maze *maze, struct entity *entity, enum direction dir) {
 	uint16_t x, y;
 	x = entity->loc.x;
 	y = entity->loc.y;
