@@ -204,6 +204,7 @@ trolls_update(const struct maze *maze, struct entity *trolls, size_t num_trolls)
 		// Else
 		// If we've failed to follow the path for any reason, try to calculate the
 		// new path
+		// FIXME change to player location
 		if (_calculate_path(maze, troll, (struct location){.x = 0, .y = 0}))
 			continue;
 
