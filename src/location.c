@@ -12,4 +12,18 @@ location_distance(struct location loc1, struct location loc2) {
 
 	return sqrt(pow(diff_x, 2) + pow(diff_y, 2));
 }
+
+bool
+location_adjacent(struct location loc1, struct location loc2) {
+	if (loc1.x == loc2.x &&
+		  abs((int32_t) loc1.y - (int32_t) loc2.y) == 1)
+		return true;
+
+	if (loc1.y == loc2.y &&
+		  abs((int32_t) loc1.x - (int32_t) loc2.x) == 1)
+		return true;
+
+	return false;
+}
+
 }
