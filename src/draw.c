@@ -93,7 +93,26 @@ draw_player(const struct entity* player)
 {
   attrset(COLOR_PAIR(colors[DRAW_MAGENTA]) | A_BOLD);
   mvprintw(0, 0, "Player: (%.2d, %.2d)", player->loc.x, player->loc.y);
-  mvprintw(Y_OFF + player->loc.y, X_OFF + player->loc.x, "%c", 'P');
+
+  char pchar;
+  switch (player->face) {
+    case NORTH:
+      pchar = '^';
+      break;
+    case SOUTH:
+      pchar = 'v';
+      break;
+    case EAST:
+      pchar = '>';
+      break;
+    case WEST:
+      pchar = '<';
+      break;
+    default:
+      pchar = 'x';
+      break;
+  }
+  mvprintw(Y_OFF + player->loc.y, X_OFF + player->loc.x, "%c", pchar);
 }
 
 void
