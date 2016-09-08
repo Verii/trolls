@@ -1,5 +1,8 @@
 #pragma once
 
-#include "game.h"
+#include <stdlib.h>
 
-void trolls_update(const struct maze *, struct entity *, size_t);
+struct entity;
+struct maze;
+
+void trolls_update(const struct maze*, struct entity*, size_t);
