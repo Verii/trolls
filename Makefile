@@ -1,9 +1,9 @@
 CC = gcc
 CPPFLAGS = -std=c11 -Isrc/
-CFLAGS = -Wall -Wextra -Wpedantic -Os -DDEBUG
+CFLAGS = -Wall -Wextra -Wpedantic -Os
 CFLAGS += -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wformat=2
-LDFLAGS = -g
-LDLIBS = -lm -lncurses -levent_core
+LDFLAGS =
+LDLIBS = -lm -lncurses
 
 ## Enable debugging flags
 #CPPSFLAGS += -UNDEBUG -DDEBUG
