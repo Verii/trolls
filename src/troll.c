@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "game.h"
@@ -87,10 +86,8 @@ _calculate_path(const struct maze* maze, struct entity* troll,
   if (!troll_path)
     return 0;
 
-  if (!maze_is_empty_space_loc(maze, dest)) {
-    fprintf(stderr, "Cannot path to invalid location\n");
+  if (!maze_is_empty_space_loc(maze, dest))
     return 0;
-  }
 
   // - Mark each node with a distance of infinity(-1) and being unvisited
   // - Each node has an undefined parent node
@@ -196,8 +193,6 @@ _calculate_path(const struct maze* maze, struct entity* troll,
     int32_t smallest_distance = -1;
     current = NULL;
 
-    fprintf(stderr, "---\nFinding smallest distance vertices\n");
-
     for (struct queue* smallest = head; smallest; smallest = smallest->next) {
       // initially find the first non-zero distance node
       if (smallest_distance == -1 && smallest->node->distance >= 0) {
@@ -217,9 +212,6 @@ _calculate_path(const struct maze* maze, struct entity* troll,
       }
     }
 
-    fprintf(stderr, "Found smallest distance vertex\n\tdistance %d\n",
-            current->node->distance);
-
     // Break when we find the target
     if (current->node->loc.x == dest.x && current->node->loc.y == dest.y)
       break;
@@ -230,14 +222,10 @@ _calculate_path(const struct maze* maze, struct entity* troll,
       if (!location_adjacent(current->node->loc, adj->node->loc))
         continue;
 
-      fprintf(stderr, "Found adjacent node\n");
-
       // Set the distance of the adjacent node to the current node's distance+1
       if (adj->node->distance == -1 ||
           adj->node->distance > current->node->distance + 1) {
         adj->node->distance = current->node->distance + 1;
-        fprintf(stderr, "\tupdated node's distance to %d\n",
-                adj->node->distance);
       }
 
       // Set the adjacent node's parent to the current node
@@ -299,12 +287,7 @@ _calculate_path(const struct maze* maze, struct entity* troll,
   stack = calloc(maze->maze_width * maze->maze_height, sizeof(*stack));
   size_t stack_top = 0;
 
-  fprintf(stderr, "Printing the path from (%.2d, %.2d) to: (%.2d, %.2d)\n",
-          troll->loc.x, troll->loc.y, dest.x, dest.y);
-
   while (target && target->parent) {
-
-    fprintf(stderr, "\t(%.2d, %.2d)\n", target->loc.x, target->loc.y);
 
     enum direction rel_dir = NORTH;
     location_relative(target->parent->loc, target->loc, &rel_dir);
@@ -313,7 +296,6 @@ _calculate_path(const struct maze* maze, struct entity* troll,
     target = target->parent;
   }
 
-  fprintf(stderr, "Rewinding the stack and assigning to troll path\n");
   while (troll_path->path.next < MAX_STEPS && stack_top > 0) {
     size_t next_step = troll_path->path.next++;
     troll_path->path.steps[next_step] = stack[--stack_top];
@@ -321,7 +303,6 @@ _calculate_path(const struct maze* maze, struct entity* troll,
 
   free(stack);
 
-  fprintf(stderr, "Cleaning up\n");
   // Cleanup the storage
   for (uint16_t i = 0; i < vertex; i++)
     free(storage[i]);
@@ -363,18 +344,23 @@ _follow_path(const struct maze* maze, struct entity* troll)
   if (troll_path->path.next >= LEN(troll_path->path.steps))
     return 0;
 
-  // Move along the calculated path
-  int did_we_move =
-    entity_move(maze, troll, troll_path->path.steps[troll_path->path.next++]);
+  int try_move =
+    entity_move(maze, troll, troll_path->path.steps[troll_path->path.next]);
 
-  if (!did_we_move) {
-    // We failed to move in the requested direction so our path is invalid
-    troll_path->path.defined = false;
+  if (try_move == 0) {
+    // Cannot follow path or it doesn't exist
     troll_path->path.next = 0;
-    return 0;
+    troll_path->path.defined = false;
+
+  } else if (try_move == 1) {
+    // Success
+    troll_path->path.next++;
+
+  } else if (try_move == 2) {
+    // We couldn't move but we did turn in the correct direction
   }
 
-  return 1;
+  return try_move;
 }
 
 // Troll AI/movement function
