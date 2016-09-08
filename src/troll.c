@@ -17,7 +17,6 @@ struct path {
 struct entity_path {
 	const struct entity *troll;
 	struct path path;
-	size_t id;
 };
 
 // static global entity_paths
@@ -39,20 +38,14 @@ _init_paths(struct entity *trolls, size_t num_trolls)
 	// Allocate each troll path
 
 	num_paths = num_trolls;
-	// we leak this memory, no big deal. We need this until the end
 	entity_paths = calloc(num_trolls, sizeof(*entity_paths));
 
-	// OOM
 	if (!entity_paths)
 		exit(1);
 
 	// Assign each troll to a troll path
-	for (uint8_t i = 0; i < num_trolls; i++) {
+	for (uint8_t i = 0; i < num_trolls; i++)
 		entity_paths[i].troll = &(trolls[i]);
-		entity_paths[i].id = i;
-	}
-
-	return;
 }
 
 // Finds the troll_path structure corresponding to the given troll
@@ -71,8 +64,6 @@ _get_path(const struct entity *troll)
 	return troll_path;
 }
 
-// FIXME
-// TODO
 // Calculate the shortest route to the destination (dest)
 //
 // Returns non-zero on all of the following: &&
@@ -92,6 +83,11 @@ _calculate_path(const struct maze *maze, struct entity *troll, struct location d
 
 	if (!troll_path)
 		return 0;
+
+	if (!maze_is_empty_space_loc(maze, dest)) {
+		fprintf(stderr, "Cannot path to invalid location\n");
+		return 0;
+	}
 
 	// - Mark each node with a distance of infinity(-1) and being unvisited
 	// - Each node has an undefined parent node
@@ -121,11 +117,6 @@ _calculate_path(const struct maze *maze, struct entity *troll, struct location d
 	//  to get there.
 	// Then append the direction to the steps array (up to MAX_STEPS moves).
 
-	if (!maze_is_empty_space_loc(maze, dest)) {
-		fprintf(stderr, "Cannot path to invalid location\n");
-		return 0;
-	}
-
 	struct pathloc {
 		struct location loc;
 		int32_t distance;
@@ -141,18 +132,12 @@ _calculate_path(const struct maze *maze, struct entity *troll, struct location d
 	struct queue *head;
 	size_t vertex = 0;
 
-	fprintf(stderr, "Allocating storage array\n");
-
 	// Each vertex is added into an array (for storage, so we can delete it
 	// later)
 	storage = calloc(maze->maze_width * maze->maze_height, sizeof(*storage));
 
-	fprintf(stderr, "Allocating queue head\n");
-
 	// ALSO put each pathloc in a queue(double linked list)
 	head = calloc(1, sizeof(*head));
-
-	fprintf(stderr, "Allocating first pathloc, adding to storage and head\n");
 
 	// first vertex is us, the troll
 	head->node = calloc(1, sizeof(**storage));
@@ -198,8 +183,6 @@ _calculate_path(const struct maze *maze, struct entity *troll, struct location d
 		}
 	}
 
-	fprintf(stderr, "Allocated %lu pathlocs\n", vertex);
-
 	// Calculate the total distance of each node
 	// This is the "main loop" of the pathfinder
 	struct queue *current;
@@ -211,28 +194,16 @@ _calculate_path(const struct maze *maze, struct entity *troll, struct location d
 
 		fprintf(stderr, "---\nFinding smallest distance vertices\n");
 
-		size_t iter = 0;
 		for (struct queue *smallest = head;
 				smallest;
 				smallest = smallest->next)
 		{
-
-			iter++;
-
 			// initially find the first non-zero distance node
 			if (smallest_distance == -1 && smallest->node->distance >= 0) {
-
 				smallest_distance = smallest->node->distance;
 				current = smallest;
-
-				fprintf(stderr, "First dist: %d @ idx %lu\n", current->node->distance, iter);
-
 				continue;
 			}
-
-			if (smallest->node->distance >= 0)
-				fprintf(stderr, "\tdist: %d @ idx %lu\n",
-						smallest->node->distance, iter);
 
 			// Then compare each remaining node to the current smallest
 			// current will eventually point to the smallest node after visiting
@@ -245,8 +216,8 @@ _calculate_path(const struct maze *maze, struct entity *troll, struct location d
 			}
 		}
 
-		fprintf(stderr, "Searched %lu indices ..\n", iter);
-		fprintf(stderr, "Found smallest distance vertex\n\tdistance %d\n", current->node->distance);
+		fprintf(stderr, "Found smallest distance vertex\n\tdistance %d\n",
+        current->node->distance);
 
 		// Break when we find the target
 		if (current->node->loc.x == dest.x && current->node->loc.y == dest.y)
@@ -304,9 +275,6 @@ _calculate_path(const struct maze *maze, struct entity *troll, struct location d
 		target = current->node;
 	current = NULL;
 
-	if (!target)
-		fprintf(stderr, "No route to destination\n");
-
 	// cleanup the queue
 	while (head) {
 		struct queue *tmp = head;
@@ -317,7 +285,6 @@ _calculate_path(const struct maze *maze, struct entity *troll, struct location d
 	}
 	head = NULL;
 
-
 	// Find the path.
 	// We're essentially back tracing thru the path.
 	// So we use a stack to reverse the direction
@@ -326,37 +293,32 @@ _calculate_path(const struct maze *maze, struct entity *troll, struct location d
 	// Then when we give the directions to the troll, we pop them off in reverse
 	// order.
 	//
-	{
-		enum direction *stack;
-		stack = calloc(maze->maze_width * maze->maze_height, sizeof(enum direction));
-		size_t stack_top = 0;
+  enum direction *stack;
+  stack = calloc(maze->maze_width * maze->maze_height, sizeof(*stack));
+  size_t stack_top = 0;
 
-		fprintf(stderr, "Printing the path from (%.2d, %.2d) to: (%.2d, %.2d)\n",
-				troll->loc.x, troll->loc.y,
-				dest.x, dest.y);
+  fprintf(stderr, "Printing the path from (%.2d, %.2d) to: (%.2d, %.2d)\n",
+      troll->loc.x, troll->loc.y,
+      dest.x, dest.y);
 
-		while (target->parent) {
+  while (target && target->parent) {
 
-			fprintf(stderr, "\t(%.2d, %.2d)\n", target->loc.x, target->loc.y);
+    fprintf(stderr, "\t(%.2d, %.2d)\n", target->loc.x, target->loc.y);
 
-			enum direction rel_dir = NORTH;
-			location_relative(target->parent->loc, target->loc, &rel_dir);
-			stack[stack_top++] = rel_dir;
+    enum direction rel_dir = NORTH;
+    location_relative(target->parent->loc, target->loc, &rel_dir);
+    stack[stack_top++] = rel_dir;
 
-			target = target->parent;
-		}
+    target = target->parent;
+  }
 
-		fprintf(stderr, "Rewinding the stack and assigning to troll path\n");
-		while (troll_path->path.next < MAX_STEPS && stack_top > 0) {
-			size_t next_step = troll_path->path.next++;
-			troll_path->path.steps[next_step] = stack[--stack_top];
-		}
+  fprintf(stderr, "Rewinding the stack and assigning to troll path\n");
+  while (troll_path->path.next < MAX_STEPS && stack_top > 0) {
+    size_t next_step = troll_path->path.next++;
+    troll_path->path.steps[next_step] = stack[--stack_top];
+  }
 
-		troll_path->path.next = 0;
-		troll_path->path.defined = true;
-
-		free(stack);
-	}
+  free(stack);
 
 
 	fprintf(stderr, "Cleaning up\n");
@@ -366,6 +328,9 @@ _calculate_path(const struct maze *maze, struct entity *troll, struct location d
 	free(storage);
 	vertex = 0;
 	storage = NULL;
+
+  troll_path->path.next = 0;
+  troll_path->path.defined = true;
 
 	return 1;
 }
@@ -426,18 +391,17 @@ trolls_update(const struct maze *maze, struct entity *trolls, size_t num_trolls)
 
 		struct entity *troll = &(trolls[i]);
 
-		uint16_t x, y;
-		x = rand() % maze->maze_width;
-		y = rand() % maze->maze_height;
-
 		// Check if we already have a defined path and follow it
 		if (_follow_path(maze, troll))
 			continue;
 
+		uint16_t x, y;
+		x = rand() % maze->maze_width;
+		y = rand() % maze->maze_height;
+
 		// Else
 		// If we've failed to follow the path for any reason, try to calculate the
 		// new path
-		// FIXME change to player location
 		if (_calculate_path(maze, troll, (struct location){.x = x, .y = y}))
 			continue;
 
