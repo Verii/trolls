@@ -1,24 +1,37 @@
 #pragma once
 
 #include <stddef.h>
+
 struct entity;
 struct maze;
 
-enum draw_colors {
-	DRAW_WHITE,
-	DRAW_RED,
-	DRAW_GREEN,
-	DRAW_YELLOW,
-	DRAW_BLUE,
-	DRAW_MAGENTA,
-	DRAW_CYAN,
-};
-
+// Initialize nCurses context
 void draw_init(void);
+
+// Destroy nCurses context
 void draw_cleanup(void);
+
+// FIXME, game over screen
 void draw_game_over(void);
 
-void draw_maze(const struct maze *);
-void draw_player(const struct entity *);
-void draw_trolls(const struct entity *, size_t);
+// Simple wrapper to keep the nCurses functions in the draw.c file
+// Returns the next character from the user
 int draw_getch(void);
+
+/* Draw functions
+ * These should be called in this order to update the screen
+ *
+ * Be sure to initialize the screen with draw_init() before using these
+ * functions
+ */
+
+// Draw the maze (p_maze) to the screen
+void draw_maze(const struct maze* p_maze);
+
+// Draw the trolls to the screen
+// Takes an array of entity pointers (a_trolls) of length (len)
+void draw_trolls(const struct entity* a_trolls, size_t len);
+
+// Draw the player to the screen
+// Takes a pointer (p_player) to the player entity
+void draw_player(const struct entity* p_player);
