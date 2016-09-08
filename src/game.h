@@ -47,16 +47,50 @@ struct game {
 	enum game_state state;
 };
 
-uint32_t location_distance(struct location, struct location);
+// Returns the real distance between the two locations
+double location_distance(struct location, struct location);
 
+// Returns true if the locations are adjacent to each other
+bool location_adjacent(struct location, struct location);
+
+// Returns true if loc2 is adjacent to loc1
+//  - Also returns the relative direction of loc2 from loc1
+// Returns false If loc2 is not adjacent to loc1
+bool location_relative(struct location loc1, struct location loc2, enum direction *);
+
+
+// Move the entity in the specified direction
 int entity_move(const struct maze *, struct entity *, enum direction);
+
+// Returns the number of empty space in the given direction
 int entity_look(const struct maze *, struct entity *, enum direction);
 
-int maze_load(struct maze *, const char *, size_t);
-bool maze_is_empty_space(const struct maze *, struct entity *, enum direction);
+
+// Load the maze in (str) of length (len) into memory
+int maze_load(struct maze *, const char *str, size_t len);
+
+// spawn the entity randomly on an empty location in the maze
 int maze_random_spawn(const struct maze *, struct entity *);
+
+// Returns true if the specified direction from the entity is empty
+bool maze_is_empty_space(const struct maze *, struct entity *, enum direction);
+
+// Returns true if the value (val) in direction is within range
 bool maze_check_bound(const struct maze *, uint16_t val, enum direction);
 
+// Returns true if the coordinate in location is empty space
+bool maze_is_empty_space_loc(const struct maze *, struct location);
+
+// Returns true if the coordinate in location is within bounds
+bool maze_check_bound_loc(const struct maze *, struct location);
+
+
+// Allocate memory and initialize new game structure
 struct game *game_new(void);
+
+// Free game memory
 void game_delete(struct game *);
+
+// Return the status of the game, i.e. WIN, LOSE, NONE
+// This is written to (struct game)->state
 void game_update(struct game *);
