@@ -5,9 +5,12 @@
 // 0 otherwise
 int entity_move(const struct maze *maze, struct entity *entity, enum direction dir)
 {
+	const uint16_t x = entity->loc.x;
+  const uint16_t y = entity->loc.y;
+
   switch (dir) {
 	case NORTH:
-    if (maze_check_bound(maze, entity->loc.y -1, dir) && 
+    if (maze_check_bound(maze, y -1, dir) && 
 				maze_is_empty_space(maze, entity, dir))
       entity->loc.y--;
     else
@@ -15,7 +18,7 @@ int entity_move(const struct maze *maze, struct entity *entity, enum direction d
     break;
 
   case SOUTH:
-    if (maze_check_bound(maze, entity->loc.y +1, dir) &&
+    if (maze_check_bound(maze, y +1, dir) &&
 				maze_is_empty_space(maze, entity, dir))
       entity->loc.y++;
     else
@@ -23,7 +26,7 @@ int entity_move(const struct maze *maze, struct entity *entity, enum direction d
     break;
 
   case EAST:
-    if (maze_check_bound(maze, entity->loc.x +1, dir) &&
+    if (maze_check_bound(maze, x +1, dir) &&
 				maze_is_empty_space(maze, entity, dir))
       entity->loc.x++;
     else
@@ -31,7 +34,7 @@ int entity_move(const struct maze *maze, struct entity *entity, enum direction d
     break;
 
   case WEST:
-    if (maze_check_bound(maze, entity->loc.x -1, dir) &&
+    if (maze_check_bound(maze, x -1, dir) &&
 				maze_is_empty_space(maze, entity, dir))
       entity->loc.x--;
     else
@@ -42,14 +45,13 @@ int entity_move(const struct maze *maze, struct entity *entity, enum direction d
   return 1;
 }
 
-// Looks in (direction) from the position of the entity up to (count) blocks
-// until a wall is hit.
 // Returns the number of blocks between the entity and the wall.
-// If the entity is standing next to a wall in (direction): return 0
-int entity_look(const struct maze *maze, struct entity *entity, enum direction dir) {
-	uint16_t x, y;
-	x = entity->loc.x;
-	y = entity->loc.y;
+// Looks in direction (dir) from the position of the entity (entity) until a
+// wall is hit.
+// If the entity is standing next to a wall in direction (dir): return 0
+int entity_look(const struct maze *maze, const struct entity *entity, enum direction dir) {
+	uint16_t x = entity->loc.x;
+	uint16_t y = entity->loc.y;
 
 	switch (dir) {
 		case NORTH:
