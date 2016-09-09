@@ -1,4 +1,4 @@
-CPPFLAGS = -std=c11 -Isrc/
+CPPFLAGS = -std=c11 -Iinclude
 CFLAGS = -Wall -Wextra -Wpedantic -Os
 CFLAGS += -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wformat=2
 CFLAGS += -Wmissing-prototypes -Wmissing-prototypes -Wredundant-decls
@@ -7,7 +7,7 @@ LDLIBS = -lm -lncurses
 
 ## Enable debugging flags
 CPPSFLAGS += -UNDEBUG -DDEBUG
-CFLAGS += -Og -g
+CFLAGS += -Og -ggdb3
 
 ## Use clang
 #CC = clang
