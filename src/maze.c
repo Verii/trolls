@@ -5,6 +5,7 @@
 
 #include "game.h"
 
+// Load the maze into memory
 int
 maze_load(struct maze* maze, const char* data, size_t datalen)
 {
@@ -17,18 +18,24 @@ maze_load(struct maze* maze, const char* data, size_t datalen)
   return 1;
 }
 
-/* Pick a random empty entity for the entity */
-int
-maze_random_spawn(const struct maze* maze, struct entity* entity)
+void
+maze_destroy(struct maze* maze)
 {
-  // random (x, y) entity location
+  free(maze->maze);
+}
+
+// Find a random empty location on the maze
+struct location
+maze_find_empty_location(const struct maze* maze)
+{
+  // random (x, y) location
   uint16_t check_x = 0, check_y = 0;
   bool spot_found = false;
 
   do {
     // pick a random y value
-    check_x = 0;
     check_y = rand() % maze->maze_height;
+    check_x = 0;
 
     // count the number of empty columns on the row
     uint8_t empty_columns = 1;
@@ -54,10 +61,15 @@ maze_random_spawn(const struct maze* maze, struct entity* entity)
 
   } while (!spot_found);
 
-  entity->face = rand() % 4;
-  entity->loc.x = check_x;
-  entity->loc.y = check_y;
+  return (struct location) { .x = check_x, .y = check_y  };
+}
 
+/* Pick a random empty entity for the entity */
+int
+maze_random_spawn(const struct maze* maze, struct entity* entity)
+{
+  entity->face = rand() % 4;
+  entity->loc = maze_find_empty_location(maze);
   return 1;
 }
 
