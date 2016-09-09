@@ -37,8 +37,6 @@ main(void)
   atexit(draw_cleanup);
 
   struct game* game = game_new();
-  if (!game)
-    exit(1);
 
   // Main loop
   while (1) {
