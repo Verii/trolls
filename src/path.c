@@ -22,6 +22,106 @@ struct queue
   struct queue *next, *prev;
 };
 
+struct bheap {
+  size_t last_node;
+  size_t length;
+  struct pathloc *nodes;
+};
+
+struct bheap*
+new_bheap(void)
+{
+  struct bheap* bheap = calloc(1, sizeof(*bheap));
+  if (!bheap)
+    exit(1);
+
+  bheap->last_node = 1;
+  bheap->length = 512;
+  bheap->nodes = calloc(bheap->length, sizeof(*bheap->nodes));
+  if (!bheap->nodes)
+    exit(1);
+
+  return bheap;
+}
+
+void
+bheap_delete(struct bheap** bheapp)
+{
+  struct bheap* bheap = *bheapp;
+  free(bheap->nodes);
+  free(bheap);
+  *bheapp = NULL;
+}
+
+void
+bheap_insert(struct bheap* bheap, struct pathloc* node)
+{
+  if (bheap->last_node >= bheap->length-1) {
+    struct pathloc *new_nodes = realloc(bheap->nodes, sizeof(*bheap->nodes) * bheap->length*2);
+    if (!new_nodes)
+      return;
+    bheap->length *= 2;
+    bheap->nodes = new_nodes;
+  }
+
+  bheap->nodes[bheap->last_node] = node;
+
+  struct pathloc* parent = bheap->nodes[bheap->last_node/2];
+  if (parent->distance > node->distance) {
+    bheap->nodes[bheap->last_node/2] = node;
+    bheap->nodes[bheap->last_node] = parent;
+  }
+
+  bheap->last_node++;
+}
+
+struct pathloc *
+bheap_pop(struct bheap* bheap)
+{
+  if (bheap->last_node <= 1)
+    return NULL;
+
+  struct pathloc* min = bheap->nodes[1];
+
+  bheap->last_node--;
+
+  if (bheap->last_node > 1) {
+    bheap->nodes[1] = bheap->nodes[bheap->last_node];
+
+    size_t node_idx = 1;
+    struct pathloc *root, *child1, *child2, *tmp;
+
+    while (1) {
+      root = bheap->nodes[node_idx];
+      child1 = bheap->nodes[node_idx *2];
+      child2 = bheap->nodes[node_idx *2 +1];
+
+      if (root->distance <= child1->distance &&
+          root->distance <= child2->distance)
+        break;
+
+      size_t new_node_idx;
+
+      tmp = child1;
+      new_node_idx = node_idx *2;
+      if (child1->distance > child2->distance) {
+        tmp = child2;
+        new_node_idx = node_idx *2 +1;
+      }
+
+      bheap->nodes[node_idx] = tmp;
+      bheap->nodes[new_node_idx] = root;
+
+      node_idx = new_node_idx;
+    }
+  }
+
+  return min;
+}
+
+///
+///
+
 // Return an array of steps to get from source location (s) to target location
 // (t). The length of the array is returned in the passes size_t pointer (l).
 //
