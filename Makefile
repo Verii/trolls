@@ -1,3 +1,12 @@
+SOURCES = src/main.c \
+          src/troll.c \
+          src/location.c \
+          src/draw.c \
+          src/maze.c \
+          src/entity.c \
+          src/game.c \
+          src/path.c
+
 CPPFLAGS = -std=c11 -Iinclude
 CFLAGS = -Wall -Wextra -Wpedantic -Os
 CFLAGS += -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wformat=2
@@ -14,7 +23,7 @@ CFLAGS += -Og -ggdb3
 #CFLAGS += -Weverything
 #CFLAGS += -O0 -g
 
-trolls: src/main.c src/troll.c src/location.c src/draw.c src/maze.c src/entity.c src/game.c
+trolls: $(SOURCES)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $^
 
 clean:
