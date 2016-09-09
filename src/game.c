@@ -73,7 +73,7 @@ game_delete(struct game* game)
 }
 
 void
-game_update(struct game* game)
+game_get_status(struct game* game)
 {
   if (MAZE_XY(&game->maze, game->player->loc.x, game->player->loc.y) == 'X')
     game->state = GAME_WIN;

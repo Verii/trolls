@@ -122,4 +122,4 @@ void game_delete(struct game*);
 
 // Return the status of the game, i.e. WIN, LOSE, NONE
 // This is written to (struct game)->state
-void game_update(struct game*);
+void game_get_status(struct game*);

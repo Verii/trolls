@@ -58,7 +58,7 @@ main(void)
       trolls_update(&game->maze, game->trolls[i]);
 
     // Check game state (i.e. win or lose)
-    game_update(game);
+    game_get_status(game);
 
     if (game->state == GAME_WIN || game->state == GAME_LOSE)
       break;
