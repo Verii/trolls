@@ -1,4 +1,26 @@
+#include <stdlib.h>
 #include "path.h"
+
+/* pathloc is used by Dijkstra's algorithm below,
+ * it hold the location as an (x, y) coord pair,
+ * The iterative distance to that node (initally infinity)
+ * And a link to that node's parent
+ */
+struct pathloc
+{
+  struct location loc;
+  int32_t distance;
+  struct pathloc* parent; // links for the path
+};
+
+/* queue is a double linked list
+ *  - node points to the pathloc (defined above)
+ */
+struct queue
+{
+  struct pathloc* node;
+  struct queue *next, *prev;
+};
 
 
 // Return an array of steps to get from source location (s) to target location
@@ -47,41 +69,40 @@
 //  to get there.
 // Then append the direction to the steps array (up to MAX_STEPS moves).
 
-enum direction *
-path_find(const struct maze* m, struct location s, struct location t, size_t *l)
+// FIXME
+// Replace the double linked list queue with a minimum priority queue
+// FIXME
+// Don't add all nodes to the queue, only add the child nodes
+// FIXME
+// Don't implement the stack here
+struct path *
+path_find(const struct maze* maze, struct location source, struct location dest)
 {
-  struct pathloc
-  {
-    struct location loc;
-    int32_t distance;
-    struct pathloc* parent; // links for the path
-  };
+  struct path* ret_path = calloc(1, sizeof(*ret_path));
+  if (!ret_path)
+    exit(1);
 
-  struct queue
-  {
-    struct pathloc* node;
-    struct queue *next, *prev;
-  };
-
-  struct pathloc** storage;
-  struct queue* head;
-  size_t vertex = 0;
+  // target is the pastloc of the target vertex
+  struct pathloc* target = NULL;
 
   // Each vertex is added into an array (for storage, so we can delete it
   // later)
+  size_t storage_idx = 0;
+  struct pathloc** storage;
   storage = calloc(maze->maze_width * maze->maze_height, sizeof(*storage));
 
   // ALSO put each pathloc in a queue(double linked list)
+  struct queue* head;
   head = calloc(1, sizeof(*head));
 
-  // first vertex is us, the troll
-  head->node = calloc(1, sizeof(**storage));
+  // first vertex is the source
+  head->node = calloc(1, sizeof(*(head->node)));
   if (!head->node)
     exit(1);
 
-  head->node->loc = troll->loc;
-  head->node->distance = 0;
-  storage[vertex++] = head->node;
+  head->node->loc = source;
+  head->node->distance = 0; // Distance to self is 0
+  storage[storage_idx++] = head->node;
 
   /* Find each valid space and add it to the queue */
   for (uint16_t y = 0; y < maze->maze_height; y++) {
@@ -91,8 +112,8 @@ path_find(const struct maze* m, struct location s, struct location t, size_t *l)
       };
 
       if (!maze_is_empty_space_loc(maze, loc) ||
-          // ignore the troll location since we added that one above
-          (loc.x == troll->loc.x && loc.y == troll->loc.y))
+          // ignore the source location since we added that one above
+          (loc.x == source.x && loc.y == source.y))
         continue;
 
       struct queue* new_head = calloc(1, sizeof(*new_head));
@@ -113,19 +134,22 @@ path_find(const struct maze* m, struct location s, struct location t, size_t *l)
       new_head->next = head;
       head = new_head;
       head->next->prev = head;
-      storage[vertex++] = head->node;
+      storage[storage_idx++] = head->node;
     }
   }
 
-  // Calculate the total distance of each node
+  // Calculate the distance from the source to each node
   // This is the "main loop" of the pathfinder
-  struct queue* current;
   while (head) {
 
     // Find the vertex with the smallest distance
     int32_t smallest_distance = -1;
-    current = NULL;
+    struct queue* current = NULL;
 
+    // A distance of -1 == infinity, so we can't purely check which node has
+    // the smallest distance.
+    // First we find the node with a distance >= 0
+    // Then we find the node with the smallest distance (excluding those < 0)
     for (struct queue* smallest = head; smallest; smallest = smallest->next) {
       // initially find the first non-zero distance node
       if (smallest_distance == -1 && smallest->node->distance >= 0) {
@@ -146,8 +170,10 @@ path_find(const struct maze* m, struct location s, struct location t, size_t *l)
     }
 
     // Break when we find the target
-    if (current->node->loc.x == dest.x && current->node->loc.y == dest.y)
+    if (current->node->loc.x == dest.x && current->node->loc.y == dest.y) {
+      target = current->node;
       break;
+    }
 
     // Find adjacent nodes and update their distances
     for (struct queue* adj = head; adj; adj = adj->next) {
@@ -187,62 +213,57 @@ path_find(const struct maze* m, struct location s, struct location t, size_t *l)
     if (!next && !prev) {
       head = NULL;
     }
-
     free(current);
-    current = NULL;
   }
 
-  // Save the target for later
-  struct pathloc* target = NULL;
-  if (current)
-    target = current->node;
-  current = NULL;
-
-  // cleanup the queue
-  while (head) {
-    struct queue* tmp = head;
-    if (tmp->next)
-      tmp->next->prev = NULL;
-    head = tmp->next;
-    free(tmp);
-  }
-  head = NULL;
+  ret_path->next = 0;
+  ret_path->num_steps = maze->maze_width * maze->maze_height;
+  ret_path->steps = calloc(ret_path->num_steps, sizeof(*ret_path->steps));
 
   // Find the path.
   // We're essentially back tracing thru the path.
   // So we use a stack to reverse the direction
   // The last move required to get us to the target goes down first, to the
   // bottom of the stack.
-  // Then when we give the directions to the troll, we pop them off in reverse
-  // order.
-  //
-  enum direction* stack;
-  stack = calloc(maze->maze_width * maze->maze_height, sizeof(*stack));
-  size_t stack_top = 0;
+  {
+    enum direction* stack;
+    stack = calloc(maze->maze_width * maze->maze_height, sizeof(*stack));
+    size_t stack_top = 0;
 
-  while (target && target->parent) {
+    while (target && target->parent) {
 
-    enum direction rel_dir = NORTH;
-    location_relative(target->parent->loc, target->loc, &rel_dir);
-    stack[stack_top++] = rel_dir;
+      enum direction rel_dir = NORTH;
+      location_relative(target->parent->loc, target->loc, &rel_dir);
+      stack[stack_top++] = rel_dir;
 
-    target = target->parent;
+      target = target->parent;
+    }
+
+    ret_path->num_steps = stack_top-1;
+
+    while (ret_path->next < ret_path->num_steps && stack_top > 0)
+      ret_path->steps[ret_path->next++] = stack[--stack_top];
+    free(stack);
+
+    ret_path->next = 0;
   }
 
-  while (troll_path->path.next < MAX_STEPS && stack_top > 0)
-    troll_path->path.steps[troll_path->path.next++] = stack[--stack_top];
+  // Cleanup the allocated memory for the queue and storage array
+  //
+  {
+    while (head) {
+      struct queue* tmp = head;
+      if (tmp->next)
+        tmp->next->prev = NULL;
+      head = tmp->next;
+      free(tmp);
+    }
 
-  free(stack);
+    // Cleanup the storage
+    for (uint16_t i = 0; i < storage_idx; i++)
+      free(storage[i]);
+    free(storage);
+  }
 
-  // Cleanup the storage
-  for (uint16_t i = 0; i < vertex; i++)
-    free(storage[i]);
-  free(storage);
-  vertex = 0;
-  storage = NULL;
-
-  troll_path->path.next = 0;
-  troll_path->path.defined = true;
-
-  return 1;
+  return ret_path;
 }
