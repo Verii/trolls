@@ -68,8 +68,8 @@ game_delete(struct game* game)
     entity_delete(&(game->trolls[i]));
   entity_delete(&game->player);
 
-  free(game->trolls);
   maze_destroy(&game->maze);
+  free(game->trolls);
   free(game);
 }
 
