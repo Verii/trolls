@@ -3,8 +3,11 @@
 
 // Troll AI/movement function
 void
-trolls_update(const struct maze* maze, struct entity* trolls, size_t num_trolls)
+trolls_update(const struct maze* maze, struct entity* troll)
 {
+  // Check if we already have a defined path and follow it
+  if (entity_follow_path(maze, troll))
+    return;
 
   // Else
   // If we've failed to follow the path for any reason, try to calculate the
