@@ -116,20 +116,13 @@ draw_player(const struct entity* player)
 }
 
 void
-draw_trolls(const struct entity* trolls, size_t num_trolls)
+draw_trolls(const struct entity* troll)
 {
   attrset(COLOR_PAIR(colors[DRAW_BLUE]) | A_BOLD);
 
-  for (uint8_t i = 0; i < num_trolls; i++) {
-
-    const struct entity* troll = &(trolls[i]);
-
-    // FIXME
-    // Needs player
-    // int32_t dist = location_distance(game->player.loc, game->trolls[i].loc);
-    // if (dist < game->player_vision)
-    mvprintw(Y_OFF + troll->loc.y, X_OFF + troll->loc.x, "%c", 'T');
-    mvprintw(i, 20, "Troll %d: (%.2d, %.2d)", i + 1, troll->loc.x,
-             troll->loc.y);
-  }
+  // FIXME
+  // Needs player
+  // int32_t dist = location_distance(game->player.loc, game->trolls[i].loc);
+  // if (dist < game->player_vision)
+  mvprintw(Y_OFF + troll->loc.y, X_OFF + troll->loc.x, "%c", 'T');
 }

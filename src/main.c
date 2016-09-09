@@ -4,30 +4,28 @@
 #include <stdlib.h>    // for atexit, exit
 #include <stdint.h>    // for int32_t
 
-void update_player(struct game*, int32_t);
+void player_update(const struct maze* maze, struct entity*, int32_t);
 int main(void);
 
 void
-update_player(struct game* game, int32_t key)
+player_update(const struct maze* maze, struct entity* player, int32_t key)
 {
-  struct entity* player = &(game->player);
-
   switch (key) {
     case 'w':
     case 'W':
-      entity_move(&game->maze, player, NORTH);
+      entity_move(maze, player, NORTH);
       break;
     case 'a':
     case 'A':
-      entity_move(&game->maze, player, WEST);
+      entity_move(maze, player, WEST);
       break;
     case 's':
     case 'S':
-      entity_move(&game->maze, player, SOUTH);
+      entity_move(maze, player, SOUTH);
       break;
     case 'd':
     case 'D':
-      entity_move(&game->maze, player, EAST);
+      entity_move(maze, player, EAST);
       break;
   }
 }
@@ -44,14 +42,20 @@ main(void)
 
   // Main loop
   while (1) {
+
+    // Draw the game
     draw_maze(&game->maze);
-    draw_trolls(game->trolls, game->num_trolls);
-    draw_player(&game->player);
+    for (uint8_t i = 0; i < game->num_trolls; i++)
+      draw_trolls(game->trolls[i]);
+    draw_player(game->player);
 
     // wait for user input
     int key = draw_getch();
-    update_player(game, key);
-    trolls_update(&game->maze, game->trolls, game->num_trolls);
+    player_update(&game->maze, game->player, key);
+
+    // Update each troll
+    for (uint8_t i = 0; i < game->num_trolls; i++)
+      trolls_update(&game->maze, game->trolls[i]);
 
     // Check game state (i.e. win or lose)
     game_update(game);

@@ -29,8 +29,8 @@ int draw_getch(void);
 void draw_maze(const struct maze* p_maze);
 
 // Draw the trolls to the screen
-// Takes an array of entity pointers (a_trolls) of length (len)
-void draw_trolls(const struct entity* a_trolls, size_t len);
+// Takes pointer to entity (trolls)
+void draw_trolls(const struct entity* troll);
 
 // Draw the player to the screen
 // Takes a pointer (p_player) to the player entity
