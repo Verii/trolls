@@ -22,6 +22,7 @@ void
 maze_destroy(struct maze* maze)
 {
   free(maze->maze);
+  maze->maze = NULL;
 }
 
 // Find a random empty location on the maze
