@@ -52,10 +52,10 @@ enum game_state
 struct game
 {
   uint8_t player_vision;
-  struct entity player;
+  struct entity* player;
 
   uint8_t num_trolls;
-  struct entity* trolls;
+  struct entity** trolls;
 
   struct maze maze;
   enum game_state state;
@@ -71,6 +71,13 @@ bool location_adjacent(struct location, struct location);
 //  - Also returns the relative direction of (l2) from (l1)
 // Returns false If (l2) is not adjacent to (l1)
 bool location_relative(struct location l1, struct location l2, enum direction*);
+
+
+// Allocate a new entity
+struct entity* entity_new(void);
+
+// Destroy an entity
+void entity_delete(struct entity**);
 
 // Move the entity in the specified direction
 int entity_move(const struct maze*, struct entity*, enum direction);

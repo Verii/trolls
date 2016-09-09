@@ -5,4 +5,4 @@
 struct entity;
 struct maze;
 
-void trolls_update(const struct maze*, struct entity*, size_t);
+void trolls_update(const struct maze*, struct entity*);
