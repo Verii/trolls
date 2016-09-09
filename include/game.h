@@ -4,11 +4,12 @@
 #include <stddef.h>  // for size_t
 #include <stdint.h>  // for uint32_t, uint8_t
 
+#define MAZE_XY(M, X, Y) ((M)->maze[(M)->maze_width * (Y) + (X)])
 #define LEN(X) (sizeof(X) / sizeof(*X))
 
 enum direction
 {
-  NORTH = 0,
+  NORTH,
   SOUTH,
   EAST,
   WEST,
@@ -34,7 +35,6 @@ struct entity
   struct path *path;
 };
 
-#define MAZE_XY(M, X, Y) ((M)->maze[(M)->maze_width * (Y) + (X)])
 struct maze
 {
   char* maze;
@@ -44,7 +44,7 @@ struct maze
 
 enum game_state
 {
-  GAME_NONE = 0,
+  GAME_NONE,
   GAME_WIN,
   GAME_LOSE,
 };
@@ -94,6 +94,10 @@ int entity_look(const struct maze*, const struct entity*, enum direction);
 
 // Load the maze in (str) of length (len) into memory
 int maze_load(struct maze*, const char* str, size_t len);
+void maze_destroy(struct maze*);
+
+// Return a random empty location on the maze
+struct location maze_find_empty_location(const struct maze*);
 
 // spawn the entity randomly on an empty location in the maze
 int maze_random_spawn(const struct maze*, struct entity*);

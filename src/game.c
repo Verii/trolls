@@ -31,15 +31,9 @@ static const char* default_maze = "#####################################"
 struct game*
 game_new()
 {
-
   struct game* new_game;
   new_game = calloc(1, sizeof(*new_game));
   if (!new_game)
-    exit(1);
-
-  new_game->num_trolls = 4;
-  new_game->trolls = malloc(sizeof(*new_game->trolls) * new_game->num_trolls);
-  if (!new_game->trolls)
     exit(1);
 
   new_game->state = GAME_NONE;
@@ -51,13 +45,18 @@ game_new()
   if (maze_load(&new_game->maze, default_maze, strlen(default_maze)) != 1)
     exit(1);
 
-  for (uint8_t i = 0; i < new_game->num_trolls; i++)
-    if (maze_random_spawn(&new_game->maze, &(new_game->trolls[i])) != 1)
-      exit(1);
-
-  // give the player a random spawn
-  if (maze_random_spawn(&new_game->maze, &(new_game->player)) != 1)
+  new_game->num_trolls = 4;
+  new_game->trolls = calloc(new_game->num_trolls, sizeof(*new_game->trolls));
+  if (!new_game->trolls)
     exit(1);
+
+  for (uint8_t i = 0; i < new_game->num_trolls; i++) {
+    new_game->trolls[i] = entity_new();
+    new_game->trolls[i]->loc = maze_find_empty_location(&new_game->maze);
+  }
+
+  new_game->player = entity_new();
+  new_game->player->loc = maze_find_empty_location(&new_game->maze);
 
   return new_game;
 }
@@ -65,6 +64,10 @@ game_new()
 void
 game_delete(struct game* game)
 {
+  for (uint8_t i = 0; i < game->num_trolls; i++)
+    entity_delete(&(game->trolls[i]));
+  entity_delete(&game->player);
+
   free(game->trolls);
   free(game);
 }
@@ -72,7 +75,7 @@ game_delete(struct game* game)
 void
 game_update(struct game* game)
 {
-  if (MAZE_XY(&game->maze, game->player.loc.x, game->player.loc.y) == 'X')
+  if (MAZE_XY(&game->maze, game->player->loc.x, game->player->loc.y) == 'X')
     game->state = GAME_WIN;
 
   // FIXME
