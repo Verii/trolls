@@ -1,151 +1,19 @@
-#include <stdbool.h>
-#include <stdlib.h>
-
 #include "game.h"
 #include "troll.h"
-
-#define MAX_STEPS 200
-
-struct path
-{
-  bool defined; // Have we already found a path
-
-  size_t next; // index into the steps array indicating the next move
-  enum direction
-    steps[MAX_STEPS]; // Each direction necessary to get to the destination
-};
-
-struct entity_path
-{
-  const struct entity* troll;
-  struct path path;
-};
-
-// static global entity_paths
-// Array of size num_trolls
-static size_t num_paths = 0;
-static struct entity_path* entity_paths = NULL;
-
-// Initialize the memory for the path data on each troll
-// Only run once, immediately returns if memory is already allocated
-static void
-_init_paths(struct entity* trolls, size_t num_trolls)
-{
-  // Don't re-initialize
-  // MUST pass the same number of trolls each time
-  if (entity_paths != NULL || num_paths > 0 ||
-      (num_paths > 0 && num_trolls != num_paths))
-    return;
-
-  // Allocate each troll path
-
-  num_paths = num_trolls;
-  entity_paths = calloc(num_trolls, sizeof(*entity_paths));
-
-  if (!entity_paths)
-    exit(1);
-
-  // Assign each troll to a troll path
-  for (uint8_t i = 0; i < num_trolls; i++)
-    entity_paths[i].troll = &(trolls[i]);
-}
-
-// Finds the troll_path structure corresponding to the given troll
-// Returns a pointer to the troll_path struct if it's found
-// If no match is found, return NULL
-static struct entity_path*
-_get_path(const struct entity* troll)
-{
-  struct entity_path* troll_path = NULL;
-
-  // Find the troll path, if it exists
-  for (uint8_t i = 0; i < num_paths; i++)
-    if (entity_paths[i].troll == troll)
-      troll_path = &(entity_paths[i]);
-
-  return troll_path;
-}
-
-
-// Attempt to follow a pre-calculated path
-//
-// Returns non-zero on all of the following: &&
-//  - a path was found for this troll
-//  - we could move along it
-//
-// Return 0 on any of the following: ||
-//  - no path was defined
-//  - no path has been calculated
-//  - we cannot continue the path
-static int
-_follow_path(const struct maze* maze, struct entity* troll)
-{
-  struct entity_path* troll_path = _get_path(troll);
-
-  // No path struct found for this troll; or
-  // no path structs allocated
-  if (troll_path == NULL)
-    return 0;
-
-  // undefined path for this troll
-  if (troll_path->path.defined == false)
-    return 0;
-
-  // We've already stepped through the array
-  if (troll_path->path.next >= LEN(troll_path->path.steps))
-    return 0;
-
-  int try_move =
-    entity_move(maze, troll, troll_path->path.steps[troll_path->path.next]);
-
-  if (try_move == 0) {
-    // Cannot follow path or it doesn't exist
-    troll_path->path.next = 0;
-    troll_path->path.defined = false;
-
-  } else if (try_move == 1) {
-    // Success
-    troll_path->path.next++;
-
-  } else if (try_move == 2) {
-    // We couldn't move but we did turn in the correct direction
-  }
-
-  return try_move;
-}
 
 // Troll AI/movement function
 void
 trolls_update(const struct maze* maze, struct entity* trolls, size_t num_trolls)
 {
 
-  // Initialize the pathfinding/memory for the trolls
-  // (only ran once)
-  _init_paths(trolls, num_trolls);
+  // Else
+  // If we've failed to follow the path for any reason, try to calculate the
+  // new path to a random empty location on the maze
+  if (entity_new_path(maze, troll, maze_find_empty_location(maze)))
+    return;
 
-  // Loop through each troll
-  for (uint8_t i = 0; i < num_trolls; i++) {
-
-    struct entity* troll = &(trolls[i]);
-
-    // Check if we already have a defined path and follow it
-    if (_follow_path(maze, troll))
-      continue;
-
-    uint16_t x, y;
-    x = rand() % maze->maze_width;
-    y = rand() % maze->maze_height;
-
-    // Else
-    // If we've failed to follow the path for any reason, try to calculate the
-    // new path
-    if (_calculate_path(maze, troll, (struct location){.x = x, .y = y }))
-      continue;
-
-    // Else
-    // Try to move in the direction we're already facing
-    // This only fails if we can't continue moving the direction we're facing
-    if (entity_move(maze, troll, troll->face))
-      continue;
-  }
+  // Else
+  // Try to move in the direction we're already facing
+  // This only fails if we can't continue moving the direction we're facing
+  entity_move(maze, troll, troll->face);
 }

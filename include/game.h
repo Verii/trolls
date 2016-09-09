@@ -16,20 +16,28 @@ enum direction
 
 struct location
 {
-  uint32_t x, y;
+  uint32_t x;
+  uint32_t y;
+};
+
+struct path
+{
+  size_t next; // index into the steps array indicating the next move
+  size_t num_steps;
+  enum direction* steps; // Each direction necessary to get to the destination
 };
 
 struct entity
 {
   enum direction face;
   struct location loc;
+  struct path *path;
 };
 
 #define MAZE_XY(M, X, Y) ((M)->maze[(M)->maze_width * (Y) + (X)])
 struct maze
 {
   char* maze;
-
   uint32_t maze_width;
   uint32_t maze_height;
 };
@@ -67,8 +75,15 @@ bool location_relative(struct location l1, struct location l2, enum direction*);
 // Move the entity in the specified direction
 int entity_move(const struct maze*, struct entity*, enum direction);
 
+// Attempts to follow the pre-calculated path, if it exists
+int entity_follow_path(const struct maze*, struct entity*);
+
+// Construct a new path to location for entity
+int entity_new_path(const struct maze*, struct entity*, struct location);
+
 // Returns the number of empty space in the given direction
 int entity_look(const struct maze*, const struct entity*, enum direction);
+
 
 // Load the maze in (str) of length (len) into memory
 int maze_load(struct maze*, const char* str, size_t len);
