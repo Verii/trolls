@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include "path.h"
+#include <stdlib.h>
 
 /* pathloc is used by Dijkstra's algorithm below,
  * it hold the location as an (x, y) coord pair,
@@ -21,7 +21,6 @@ struct queue
   struct pathloc* node;
   struct queue *next, *prev;
 };
-
 
 // Return an array of steps to get from source location (s) to target location
 // (t). The length of the array is returned in the passes size_t pointer (l).
@@ -75,7 +74,7 @@ struct queue
 // Don't add all nodes to the queue, only add the child nodes
 // FIXME
 // Don't implement the stack here
-struct path *
+struct path*
 path_find(const struct maze* maze, struct location source, struct location dest)
 {
   struct path* ret_path = calloc(1, sizeof(*ret_path));
@@ -239,7 +238,7 @@ path_find(const struct maze* maze, struct location source, struct location dest)
       target = target->parent;
     }
 
-    ret_path->num_steps = stack_top-1;
+    ret_path->num_steps = stack_top - 1;
 
     while (ret_path->next < ret_path->num_steps && stack_top > 0)
       ret_path->steps[ret_path->next++] = stack[--stack_top];

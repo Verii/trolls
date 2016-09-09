@@ -3,7 +3,6 @@
 #include "game.h"
 #include "path.h"
 
-
 struct entity*
 entity_new(void)
 {
@@ -115,8 +114,7 @@ entity_follow_path(const struct maze* maze, struct entity* entity)
     return 0;
   }
 
-  int try_move =
-    entity_move(maze, entity, path->steps[path->next]);
+  int try_move = entity_move(maze, entity, path->steps[path->next]);
 
   if (try_move == 0) {
     // Cannot follow path or it doesn't exist
@@ -140,7 +138,8 @@ entity_follow_path(const struct maze* maze, struct entity* entity)
 // Return 0 if the path cannot be found
 // Return 1 if the path was found
 int
-entity_new_path(const struct maze* maze, struct entity* entity, struct location target)
+entity_new_path(const struct maze* maze, struct entity* entity,
+                struct location target)
 {
   if (entity->path) {
     free(entity->path->steps);

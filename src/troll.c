@@ -1,5 +1,5 @@
-#include "game.h"
 #include "troll.h"
+#include "game.h"
 
 // Troll AI/movement function
 void

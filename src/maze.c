@@ -62,7 +62,7 @@ maze_find_empty_location(const struct maze* maze)
 
   } while (!spot_found);
 
-  return (struct location) { .x = check_x, .y = check_y  };
+  return (struct location){.x = check_x, .y = check_y };
 }
 
 /* Pick a random empty entity for the entity */

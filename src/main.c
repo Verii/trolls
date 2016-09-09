@@ -1,8 +1,8 @@
-#include "draw.h"      // for draw_getch, draw_init, draw_maze, draw_player
-#include "game.h"      // for game, entity_move, direction::EAST, direction...
-#include "troll.h"     // for update_trolls
-#include <stdlib.h>    // for atexit, exit
-#include <stdint.h>    // for int32_t
+#include "draw.h"   // for draw_getch, draw_init, draw_maze, draw_player
+#include "game.h"   // for game, entity_move, direction::EAST, direction...
+#include "troll.h"  // for update_trolls
+#include <stdint.h> // for int32_t
+#include <stdlib.h> // for atexit, exit
 
 void player_update(const struct maze* maze, struct entity*, int32_t);
 int main(void);

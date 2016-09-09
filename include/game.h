@@ -32,7 +32,7 @@ struct entity
 {
   enum direction face;
   struct location loc;
-  struct path *path;
+  struct path* path;
 };
 
 struct maze
@@ -72,7 +72,6 @@ bool location_adjacent(struct location, struct location);
 // Returns false If (l2) is not adjacent to (l1)
 bool location_relative(struct location l1, struct location l2, enum direction*);
 
-
 // Allocate a new entity
 struct entity* entity_new(void);
 
@@ -90,7 +89,6 @@ int entity_new_path(const struct maze*, struct entity*, struct location);
 
 // Returns the number of empty space in the given direction
 int entity_look(const struct maze*, const struct entity*, enum direction);
-
 
 // Load the maze in (str) of length (len) into memory
 int maze_load(struct maze*, const char* str, size_t len);
