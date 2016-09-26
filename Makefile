@@ -15,7 +15,7 @@ LDFLAGS =
 LDLIBS = -lm -lncurses
 
 ## Enable debugging flags
-CPPSFLAGS += -UNDEBUG -DDEBUG
+CPPFLAGS += -UNDEBUG -DDEBUG
 CFLAGS += -Og -ggdb3
 
 ## Use clang
