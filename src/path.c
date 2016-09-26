@@ -267,7 +267,10 @@ path_find(const struct maze* maze, struct location source, struct location dest)
     initial->in_queue = true;
     bheap_insert(bheap, initial);
     storage[storage_idx++] = initial;
+
+#ifdef DEBUG
     fprintf(stderr, "Added Source\n");
+#endif
   }
 
   /* Find each valid space and add it to the storage array */
@@ -289,7 +292,9 @@ path_find(const struct maze* maze, struct location source, struct location dest)
       storage[storage_idx++] = ploc;
     }
   }
+#ifdef DEBUG
   fprintf(stderr, "Added Others\n");
+#endif
 
   // Calculate the distance from the source to each node
   // This is the "main loop" of the pathfinder
@@ -297,11 +302,15 @@ path_find(const struct maze* maze, struct location source, struct location dest)
     struct pathloc *min = bheap_pop(bheap);
     min->visited = true;
 
+#ifdef DEBUG
     fprintf(stderr, "Found minimum: %d\n", min->distance);
+#endif
 
     // Break when we find the target
     if (min->loc.x == dest.x && min->loc.y == dest.y) {
+#ifdef DEBUG
       fprintf(stderr, "Found target\n");
+#endif
       target = min;
       break;
     }
@@ -313,17 +322,23 @@ path_find(const struct maze* maze, struct location source, struct location dest)
       adj = storage[i];
 
       if (adj->visited) {
-        fprintf(stderr, "Node already visited %d/%d\n", i, storage_idx-1);
+#ifdef DEBUG
+        fprintf(stderr, "Node already visited %d/%lu\n", i, storage_idx-1);
+#endif
         continue;
       }
 
       if (!location_adjacent(min->loc, adj->loc)) {
-        fprintf(stderr, "Node not adjacent %d/%d\n", i, storage_idx-1);
+#ifdef DEBUG
+        fprintf(stderr, "Node not adjacent %d/%lu\n", i, storage_idx-1);
+#endif
         continue;
       }
 
+#ifdef DEBUG
       fprintf(stderr, "(%d, %d) found neighbor (%d, %d)\n",
           min->loc.x, min->loc.y, adj->loc.x, adj->loc.y);
+#endif
 
       if (adj->distance > min->distance+1) {
         if (adj->in_queue == false) {
@@ -332,7 +347,11 @@ path_find(const struct maze* maze, struct location source, struct location dest)
         }
         adj->distance = min->distance+1;
         adj->parent = min;
+
+        bheap_update(bheap, adj);
+#ifdef DEBUG
         fprintf(stderr, "Updated Neighbor: %d\n", adj->distance);
+#endif
       }
     }
   }
@@ -361,7 +380,9 @@ path_find(const struct maze* maze, struct location source, struct location dest)
     }
 
     ret_path->num_steps = stack_top - 1;
+#ifdef DEBUG
     fprintf(stderr, "%lu steps to destination\n", ret_path->num_steps);
+#endif
 
     while (ret_path->next < ret_path->num_steps && stack_top > 0)
       ret_path->steps[ret_path->next++] = stack[--stack_top];
@@ -369,7 +390,9 @@ path_find(const struct maze* maze, struct location source, struct location dest)
 
     ret_path->next = 0;
   } else {
+#ifdef DEBUG
     fprintf(stderr, "Could not find path (%d, %d) -> (%d, %d)\n", source.x, source.y, dest.x, dest.y);
+#endif
     free(ret_path);
     ret_path = NULL;
   }
@@ -384,6 +407,8 @@ path_find(const struct maze* maze, struct location source, struct location dest)
     free(storage[i]);
   free(storage);
 
+#ifdef DEBUG
   fprintf(stderr, "\n\n");
+#endif
   return ret_path;
 }
