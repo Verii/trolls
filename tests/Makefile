@@ -5,15 +5,15 @@ SOURCES = ../src/troll.c \
           ../src/game.c
 
 CPPFLAGS = -std=c11 -I../include
-CFLAGS = -Wall -Wextra -Wpedantic -Os
+CFLAGS = -Wall -Wextra -Wpedantic -O0
 CFLAGS += -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wformat=2
 CFLAGS += -Wmissing-prototypes -Wmissing-prototypes -Wredundant-decls
 LDFLAGS =
 LDLIBS = -lm
 
 ## Enable debugging flags
-CPPSFLAGS += -UNDEBUG -DDEBUG
-CFLAGS += -Og -ggdb3
+#CPPSFLAGS += -UNDEBUG -DDEBUG
+#CFLAGS += -Og -ggdb3
 
 ## Use clang
 #CC = clang

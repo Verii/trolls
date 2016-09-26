@@ -15,11 +15,12 @@ main(void)
 {
   struct game* game = game_new();
 
-  // Start at (x, y)
+  // Start at the bottom left of the default maze
   game->trolls[0]->loc.x = 1;
   game->trolls[0]->loc.y = 21;
 
-  // Calculate the same path 100 000 times
+  // Move to the top right of the maze(longest path)
+  // Calculate the same path 10 000 times
   for (size_t count = 0; count < 10000; count++) {
     entity_new_path(&game->maze, game->trolls[0],
         (struct location) { .x = 35, .y = 1 });
