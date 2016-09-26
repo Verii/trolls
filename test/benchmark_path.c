@@ -2,7 +2,11 @@
 #include "troll.h"  // for update_trolls
 #include <stdint.h> // for int32_t
 
-#include "path-queue.c"
+#if defined(BENCH_PATH_QUEUE)
+# include "src/path-queue.c"
+#elif defined(BENCH_PATH_BHEAP)
+# include "src/path-bheap.c"
+#endif
 
 int main(void);
 

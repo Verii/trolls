@@ -20,13 +20,19 @@ CFLAGS += -Og -ggdb3
 #CFLAGS += -Weverything
 #CFLAGS += -O0 -g
 
-benchmark-queue: benchmark_path-queue.c $(SOURCES)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $^
+all: bin/path_queue bin/path_bheap
+
+bin/path_queue: benchmark_path.c $(SOURCES)
+	$(CC) -DBENCH_PATH_QUEUE $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $^
+
+bin/path_bheap: benchmark_path.c $(SOURCES)
+	$(CC) -DBENCH_PATH_BHEAP $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $^
 
 run:
-	/usr/bin/time -v ./benchmark-queue
+	/usr/bin/time -v ./bin/path_queue
+	/usr/bin/time -v ./bin/path_bheap
 
 clean:
-	rm -fv benchmark-queue
+	rm -fv ./bin/path_queue ./bin/path_bheap
 
 .PHONY: clean
