@@ -12,15 +12,15 @@ LDFLAGS =
 LDLIBS = -lm
 
 ## Enable debugging flags
-#CPPSFLAGS += -UNDEBUG -DDEBUG
-#CFLAGS += -Og -ggdb3
+CPPSFLAGS += -UNDEBUG -DDEBUG
+CFLAGS += -Og -ggdb3
 
 ## Use clang
 #CC = clang
 #CFLAGS += -Weverything
 #CFLAGS += -O0 -g
 
-all: bin/path_queue bin/path_bheap
+all: bin/path_queue bin/path_bheap bin/path_bheap-storage
 
 bin/path_queue: benchmark_path.c $(SOURCES)
 	$(CC) -DBENCH_PATH_QUEUE $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $^
@@ -28,11 +28,14 @@ bin/path_queue: benchmark_path.c $(SOURCES)
 bin/path_bheap: benchmark_path.c $(SOURCES)
 	$(CC) -DBENCH_PATH_BHEAP $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $^
 
+bin/path_bheap-storage: benchmark_path.c $(SOURCES)
+	$(CC) -DBENCH_PATH_BHEAP_01 $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $^
+
 run:
 	/usr/bin/time -v ./bin/path_queue
 	/usr/bin/time -v ./bin/path_bheap
 
 clean:
-	rm -fv ./bin/path_queue ./bin/path_bheap
+	rm -fv ./bin/path_queue ./bin/path_bheap ./bin/path_bheap-storage
 
 .PHONY: clean
