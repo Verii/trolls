@@ -28,6 +28,9 @@ void bheap_insert(struct bheap*, struct pathloc*);
 struct pathloc* bheap_peek(struct bheap*);
 struct pathloc* bheap_pop(struct bheap*);
 
+void bheap_bubble_down(struct bheap*, size_t);
+void bheap_bubble_up(struct bheap*);
+void bheap_update(struct bheap*, struct pathloc*);
 
 ///
 ///
@@ -58,6 +61,70 @@ bheap_delete(struct bheap** bheapp)
 }
 
 void
+bheap_bubble_up(struct bheap* bheap)
+{
+  size_t my_idx, parent_idx;
+  struct pathloc* parent, *me;
+
+  my_idx = bheap->last_node -1;
+
+  while (my_idx > 1) {
+    parent_idx = my_idx/2;
+    parent = bheap->nodes[parent_idx];
+    me = bheap->nodes[my_idx];
+
+    if (parent->distance <= me->distance)
+      break;
+
+    bheap->nodes[parent_idx] = me;
+    bheap->nodes[my_idx] = parent;
+
+    my_idx /= 2;
+  }
+}
+
+void
+bheap_bubble_down(struct bheap* bheap, size_t node_idx)
+{
+  struct pathloc *root, *child1, *child2, *tmp;
+
+  while ((node_idx*2 +1) < bheap->last_node) {
+    root = bheap->nodes[node_idx];
+    child1 = bheap->nodes[node_idx *2];
+    child2 = bheap->nodes[node_idx *2 +1];
+
+    if (child1 == NULL)
+      break;
+
+    if (child2 == NULL) {
+      if (root->distance <= child1->distance)
+        break;
+      bheap->nodes[node_idx] = child1;
+      bheap->nodes[node_idx*2 +1] = root;
+      break;
+    }
+
+    if (root->distance <= child1->distance &&
+        root->distance <= child2->distance)
+      break;
+
+    size_t new_node_idx;
+
+    tmp = child1;
+    new_node_idx = node_idx *2;
+    if (child1->distance > child2->distance) {
+      tmp = child2;
+      new_node_idx = node_idx *2 +1;
+    }
+
+    bheap->nodes[node_idx] = tmp;
+    bheap->nodes[new_node_idx] = root;
+
+    node_idx = new_node_idx;
+  }
+}
+
+void
 bheap_insert(struct bheap* bheap, struct pathloc* node)
 {
   if (bheap->last_node >= bheap->length-1) {
@@ -75,26 +142,8 @@ bheap_insert(struct bheap* bheap, struct pathloc* node)
     return;
   }
 
-  size_t my_idx, parent_idx;
-  struct pathloc* parent, *me;
-
-  my_idx = bheap->last_node;
-
-  while (my_idx > 1) {
-    parent_idx = my_idx/2;
-    parent = bheap->nodes[parent_idx];
-    me = bheap->nodes[my_idx];
-
-    if (parent->distance <= me->distance)
-      break;
-
-    bheap->nodes[parent_idx] = me;
-    bheap->nodes[my_idx] = parent;
-
-    my_idx /= 2;
-  }
-
   bheap->last_node++;
+  bheap_bubble_up(bheap);
 }
 
 struct pathloc *
@@ -117,47 +166,28 @@ bheap_pop(struct bheap* bheap)
 
   if (bheap->last_node > 1) {
     bheap->nodes[1] = bheap->nodes[bheap->last_node];
+    bheap->nodes[bheap->last_node] = NULL;
 
-    size_t node_idx = 1;
-    struct pathloc *root, *child1, *child2, *tmp;
-
-    while (1) {
-      root = bheap->nodes[node_idx];
-      child1 = bheap->nodes[node_idx *2];
-      child2 = bheap->nodes[node_idx *2 +1];
-
-      if (child1 == NULL)
-        break;
-
-      if (child2 == NULL) {
-        if (root->distance <= child1->distance)
-          break;
-        bheap->nodes[node_idx] = child1;
-        bheap->nodes[node_idx*2 +1] = root;
-        break;
-      }
-
-      if (root->distance <= child1->distance &&
-          root->distance <= child2->distance)
-        break;
-
-      size_t new_node_idx;
-
-      tmp = child1;
-      new_node_idx = node_idx *2;
-      if (child1->distance > child2->distance) {
-        tmp = child2;
-        new_node_idx = node_idx *2 +1;
-      }
-
-      bheap->nodes[node_idx] = tmp;
-      bheap->nodes[new_node_idx] = root;
-
-      node_idx = new_node_idx;
-    }
+    bheap_bubble_down(bheap, 1);
   }
 
   return min;
+}
+
+void
+bheap_update(struct bheap* bheap, struct pathloc* node)
+{
+  size_t my_idx = 0;
+
+  for (size_t i = 1; i < bheap->last_node; i++) {
+    if (bheap->nodes[i] == node)
+      my_idx = i;
+  }
+
+  if (my_idx == 0)
+    return;
+
+  bheap_bubble_down(bheap, my_idx);
 }
 
 ///
