@@ -1,6 +1,6 @@
 #include "path.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /* pathloc is used by Dijkstra's algorithm below,
  * it hold the location as an (x, y) coord pair,
@@ -16,10 +16,11 @@ struct pathloc
   struct pathloc* parent; // links for the path
 };
 
-struct bheap {
+struct bheap
+{
   size_t last_node;
   size_t length;
-  struct pathloc **nodes;
+  struct pathloc** nodes;
 };
 
 struct bheap* bheap_new(void);
@@ -36,17 +37,18 @@ void bheap_update(struct bheap*, struct pathloc*);
 ///
 ///
 
-
 struct bheap*
 bheap_new(void)
 {
   struct bheap* bheap = calloc(1, sizeof(*bheap));
-  if (!bheap) exit(1);
+  if (!bheap)
+    exit(1);
 
   bheap->last_node = 1;
   bheap->length = 512;
   bheap->nodes = calloc(bheap->length, sizeof(*bheap->nodes));
-  if (!bheap->nodes) exit(1);
+  if (!bheap->nodes)
+    exit(1);
 
   return bheap;
 }
@@ -64,12 +66,12 @@ void
 bheap_bubble_up(struct bheap* bheap)
 {
   size_t my_idx, parent_idx;
-  struct pathloc* parent, *me;
+  struct pathloc *parent, *me;
 
-  my_idx = bheap->last_node -1;
+  my_idx = bheap->last_node - 1;
 
   while (my_idx > 1) {
-    parent_idx = my_idx/2;
+    parent_idx = my_idx / 2;
     parent = bheap->nodes[parent_idx];
     me = bheap->nodes[my_idx];
 
@@ -88,10 +90,10 @@ bheap_bubble_down(struct bheap* bheap, size_t node_idx)
 {
   struct pathloc *root, *child1, *child2, *tmp;
 
-  while ((node_idx*2 +1) < bheap->last_node) {
+  while ((node_idx * 2 + 1) < bheap->last_node) {
     root = bheap->nodes[node_idx];
-    child1 = bheap->nodes[node_idx *2];
-    child2 = bheap->nodes[node_idx *2 +1];
+    child1 = bheap->nodes[node_idx * 2];
+    child2 = bheap->nodes[node_idx * 2 + 1];
 
     if (child1 == NULL)
       break;
@@ -100,7 +102,7 @@ bheap_bubble_down(struct bheap* bheap, size_t node_idx)
       if (root->distance <= child1->distance)
         break;
       bheap->nodes[node_idx] = child1;
-      bheap->nodes[node_idx*2 +1] = root;
+      bheap->nodes[node_idx * 2 + 1] = root;
       break;
     }
 
@@ -111,10 +113,10 @@ bheap_bubble_down(struct bheap* bheap, size_t node_idx)
     size_t new_node_idx;
 
     tmp = child1;
-    new_node_idx = node_idx *2;
+    new_node_idx = node_idx * 2;
     if (child1->distance > child2->distance) {
       tmp = child2;
-      new_node_idx = node_idx *2 +1;
+      new_node_idx = node_idx * 2 + 1;
     }
 
     bheap->nodes[node_idx] = tmp;
@@ -127,8 +129,9 @@ bheap_bubble_down(struct bheap* bheap, size_t node_idx)
 void
 bheap_insert(struct bheap* bheap, struct pathloc* node)
 {
-  if (bheap->last_node >= bheap->length-1) {
-    struct pathloc** new_nodes = realloc(bheap->nodes, sizeof(*bheap->nodes) * bheap->length*2);
+  if (bheap->last_node >= bheap->length - 1) {
+    struct pathloc** new_nodes =
+      realloc(bheap->nodes, sizeof(*bheap->nodes) * bheap->length * 2);
     if (!new_nodes)
       return;
     bheap->length *= 2;
@@ -146,7 +149,7 @@ bheap_insert(struct bheap* bheap, struct pathloc* node)
   bheap_bubble_up(bheap);
 }
 
-struct pathloc *
+struct pathloc*
 bheap_peek(struct bheap* bheap)
 {
   if (bheap->last_node < 2)
@@ -154,7 +157,7 @@ bheap_peek(struct bheap* bheap)
   return bheap->nodes[1];
 }
 
-struct pathloc *
+struct pathloc*
 bheap_pop(struct bheap* bheap)
 {
   if (bheap->last_node < 2)
@@ -245,7 +248,8 @@ struct path*
 path_find(const struct maze* maze, struct location source, struct location dest)
 {
   struct path* ret_path = calloc(1, sizeof(*ret_path));
-  if (!ret_path) exit(1);
+  if (!ret_path)
+    exit(1);
 
   // target is the pathloc of the target vertex
   struct pathloc* target = NULL;
@@ -261,7 +265,8 @@ path_find(const struct maze* maze, struct location source, struct location dest)
   // first vertex is the source
   {
     struct pathloc* initial = calloc(1, sizeof(*initial));
-    if (!initial) exit(1);
+    if (!initial)
+      exit(1);
     initial->loc = source;
     initial->distance = 0; // Distance to self is 0
     initial->in_queue = true;
@@ -277,7 +282,7 @@ path_find(const struct maze* maze, struct location source, struct location dest)
   for (uint16_t y = 0; y < maze->maze_height; y++) {
     for (uint16_t x = 0; x < maze->maze_width; x++) {
 
-      struct location loc = (struct location){.x = x, .y = y};
+      struct location loc = (struct location){.x = x, .y = y };
 
       if (!maze_is_empty_space_loc(maze, loc) ||
           // ignore the source location since we added that one above
@@ -285,7 +290,8 @@ path_find(const struct maze* maze, struct location source, struct location dest)
         continue;
 
       struct pathloc* ploc = calloc(1, sizeof(*ploc));
-      if (!ploc) exit(1);
+      if (!ploc)
+        exit(1);
 
       ploc->loc = loc;
       ploc->distance = 0x10000; // some large number
@@ -299,7 +305,7 @@ path_find(const struct maze* maze, struct location source, struct location dest)
   // Calculate the distance from the source to each node
   // This is the "main loop" of the pathfinder
   while (bheap_peek(bheap)) {
-    struct pathloc *min = bheap_pop(bheap);
+    struct pathloc* min = bheap_pop(bheap);
     min->visited = true;
 
 #ifdef DEBUG
@@ -315,7 +321,7 @@ path_find(const struct maze* maze, struct location source, struct location dest)
       break;
     }
 
-    struct pathloc *adj;
+    struct pathloc* adj;
 
     // Find an adjacent space in our storage array
     for (uint16_t i = 0; i < storage_idx; i++) {
@@ -323,29 +329,29 @@ path_find(const struct maze* maze, struct location source, struct location dest)
 
       if (adj->visited) {
 #ifdef DEBUG
-        fprintf(stderr, "Node already visited %d/%lu\n", i, storage_idx-1);
+        fprintf(stderr, "Node already visited %d/%lu\n", i, storage_idx - 1);
 #endif
         continue;
       }
 
       if (!location_adjacent(min->loc, adj->loc)) {
 #ifdef DEBUG
-        fprintf(stderr, "Node not adjacent %d/%lu\n", i, storage_idx-1);
+        fprintf(stderr, "Node not adjacent %d/%lu\n", i, storage_idx - 1);
 #endif
         continue;
       }
 
 #ifdef DEBUG
-      fprintf(stderr, "(%d, %d) found neighbor (%d, %d)\n",
-          min->loc.x, min->loc.y, adj->loc.x, adj->loc.y);
+      fprintf(stderr, "(%d, %d) found neighbor (%d, %d)\n", min->loc.x,
+              min->loc.y, adj->loc.x, adj->loc.y);
 #endif
 
-      if (adj->distance > min->distance+1) {
+      if (adj->distance > min->distance + 1) {
         if (adj->in_queue == false) {
           bheap_insert(bheap, adj);
           adj->in_queue = true;
         }
-        adj->distance = min->distance+1;
+        adj->distance = min->distance + 1;
         adj->parent = min;
 
         bheap_update(bheap, adj);
@@ -391,7 +397,8 @@ path_find(const struct maze* maze, struct location source, struct location dest)
     ret_path->next = 0;
   } else {
 #ifdef DEBUG
-    fprintf(stderr, "Could not find path (%d, %d) -> (%d, %d)\n", source.x, source.y, dest.x, dest.y);
+    fprintf(stderr, "Could not find path (%d, %d) -> (%d, %d)\n", source.x,
+            source.y, dest.x, dest.y);
 #endif
     free(ret_path);
     ret_path = NULL;
